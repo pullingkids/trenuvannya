@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Тренування">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Програма тренувань</title>
+<style>
+:root{
+  --bg:#0b0d10;--bg2:#11151a;--card:#161b21;--card2:#1b2129;--line:#262e38;
+  --txt:#eef1f5;--mut:#8d97a5;--acc:#c6ff3d;--acc-d:#9ccc22;--acc2:#ff7a2f;
+  --ok:#3ddc84;--bad:#ff5d62;--fig:#e8ecf1;--eq:#56616e;
+  --r:18px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);
+  font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background-image:radial-gradient(1200px 500px at 50% -200px,rgba(198,255,61,.07),transparent 70%);
+  min-height:100vh;padding-bottom:calc(140px + var(--safe-b))}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{overscroll-behavior-y:none}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button,input,label{touch-action:manipulation}
+.wrap{max-width:980px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+.banner.install{margin-bottom:12px;background:var(--card);border-color:rgba(198,255,61,.35);color:#d6dce4;flex-wrap:nowrap}
+.install .btn{flex:none;width:44px;padding:0}
+.install svg{width:15px;height:15px;vertical-align:-2px;color:var(--acc)}
+.install b{color:var(--acc)}
+.settings .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:18px 0 12px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 240px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--acc);color:#0b0d10;display:grid;place-items:center;flex:none}
+.logo svg{width:26px;height:26px}
+.brand h1{margin:0;font-size:20px;letter-spacing:.04em;text-transform:uppercase;font-weight:900;line-height:1.1}
+.brand p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.top-actions{display:flex;gap:8px;flex:none;margin-left:auto}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;min-height:44px;padding:0 14px;font-weight:700;font-size:14px}
+.btn:active{transform:scale(.97)}
+.btn.danger{border-color:rgba(255,93,98,.45);color:#ffb3b5}
+.btn.acc{background:var(--acc);color:#0b0d10;border-color:var(--acc)}
+.icon-btn{width:44px;padding:0;font-size:20px}
+
+.settings{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:grid;gap:4px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;font-size:15px}
+.switch input{appearance:none;-webkit-appearance:none;width:52px;height:30px;border-radius:30px;background:#2a323c;position:relative;flex:none;transition:.2s;margin:0;cursor:pointer}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked{background:var(--acc-d)}
+.switch input:checked::after{left:25px}
+.settings .hint{color:var(--mut);font-size:12.5px;margin:4px 0 0}
+
+/* Tabs */
+.tabs-bar{position:sticky;top:0;z-index:20;background:rgba(11,13,16,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 0}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:9px 8px;text-align:left;display:grid;gap:1px;min-height:64px;position:relative;overflow:hidden}
+.tab b{font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.tab span{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab em{font-style:normal;font-size:12px;font-weight:700;color:var(--acc)}
+.tab[aria-selected="true"]{background:var(--acc);border-color:var(--acc);color:#0b0d10}
+.tab[aria-selected="true"] span,.tab[aria-selected="true"] em{color:#26310a}
+
+/* Day */
+.day{padding-top:16px}
+.day-h h2{margin:0;font-size:24px;font-weight:900;letter-spacing:.01em}
+.day-h p{margin:2px 0 10px;color:var(--mut);font-size:14px}
+.pbar{height:8px;border-radius:8px;background:var(--card2);overflow:hidden;margin-bottom:14px}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc-d),var(--acc));border-radius:8px;transition:width .3s}
+.banner{background:rgba(255,122,47,.1);border:1px solid rgba(255,122,47,.4);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px}
+.day-note{background:var(--card);border-left:4px solid var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px;color:#cfd6df}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;transition:border-color .2s}
+.card.complete{border-color:rgba(61,220,132,.55)}
+.ex-h{display:flex;gap:12px;align-items:flex-start}
+.ex-num{width:38px;height:38px;border-radius:11px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-weight:900;font-size:17px;flex:none;color:var(--acc)}
+.ex-t{flex:1;min-width:0}
+.ex-t h3{margin:4px 0 6px;font-size:19px;line-height:1.2;font-weight:800}
+.ex-ok{width:32px;height:32px;border-radius:50%;background:var(--ok);color:#06210f;display:grid;place-items:center;font-weight:900;flex:none;opacity:0;transform:scale(.5);transition:.25s}
+.card.complete .ex-ok{opacity:1;transform:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:#d6dce4}
+.chip.rest{color:var(--acc);border-color:rgba(198,255,61,.3)}
+.chip.warm{color:#0b0d10;background:var(--acc2);border-color:var(--acc2)}
+.prev-date{font-size:12.5px;color:var(--mut);margin:8px 0 0}
+
+.ex-body{display:grid;gap:12px;margin-top:12px}
+@media (min-width:760px){.ex-body{grid-template-columns:minmax(260px,1fr) 1.2fr;align-items:start}}
+.fig-wrap{margin:0;background:radial-gradient(circle at 50% 40%,#1d252e,#12171c 75%);border:1px solid var(--line);border-radius:14px;position:relative;overflow:hidden;user-select:none}
+.lt-box{width:100%;aspect-ratio:var(--ar,4/3);max-height:min(70vw,320px);display:flex;align-items:center;justify-content:center}
+.lt-box>svg{display:block}
+.fig-wrap.loading .lt-box{background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%) 0 0/200% 100%;animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.lt-btn{position:absolute;right:10px;bottom:10px;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:rgba(11,13,16,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--acc);font-size:16px;font-weight:900;display:grid;place-items:center}
+.lt-btn:active{transform:scale(.92)}
+.fig-wrap.empty .lt-box{aspect-ratio:auto;min-height:160px}
+.lt-empty{display:grid;justify-items:center;gap:6px;text-align:center;padding:18px 16px;color:var(--mut)}
+.lt-empty svg{width:42px;height:42px;color:#3f4955}
+.lt-empty b{color:#c9d1db;font-size:14.5px}
+.lt-empty small{font-size:12px;line-height:1.35;max-width:280px;word-break:break-word}
+
+.tech{background:var(--bg2);border:1px solid var(--line);border-radius:14px}
+.tech summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;font-size:15px;display:flex;justify-content:space-between;align-items:center;min-height:48px}
+.tech summary::-webkit-details-marker{display:none}
+.tech summary::after{content:"▾";color:var(--mut);transition:.2s}
+.tech[open] summary::after{transform:rotate(180deg)}
+.tech-in{padding:0 14px 12px}
+.tech h4{margin:6px 0 6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.08em}
+.tech h4.good{color:var(--ok)}.tech h4.bad{color:var(--bad)}
+.tech ul{margin:0 0 8px;padding:0;list-style:none;display:grid;gap:6px}
+.tech li{position:relative;padding-left:22px;font-size:14.5px;color:#d7dde5}
+.tech ul.good li::before{content:"✓";position:absolute;left:2px;color:var(--ok);font-weight:900}
+.tech ul.bad li::before{content:"✕";position:absolute;left:2px;color:var(--bad);font-weight:900}
+.ex-note{margin:12px 0 0;font-size:14px;color:#cfd6df;background:rgba(198,255,61,.06);border:1px dashed rgba(198,255,61,.28);border-radius:12px;padding:9px 12px}
+
+/* Sets */
+.sets{margin-top:14px;display:grid;gap:8px}
+.sets-h,.set{display:grid;grid-template-columns:64px 1fr 1fr 56px;gap:8px;align-items:center}
+.sets-h{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:0 8px}
+.sets-h span:nth-child(n+2){text-align:center}
+.set{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px;transition:background .2s,border-color .2s}
+.set.done{background:rgba(61,220,132,.08);border-color:rgba(61,220,132,.38)}
+.set .n{display:grid;line-height:1.1}
+.set .n b{font-size:20px;font-weight:900}
+.set .n small{font-size:12px;color:var(--mut);font-weight:700}
+.tag{font-style:normal;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--acc2);margin-top:2px}
+.tag.drop{color:#ff5dc8}.tag.wu{color:var(--acc)}
+.set input{width:100%;min-width:0;height:50px;border-radius:11px;border:1px solid var(--line);background:#0c1014;color:var(--txt);font-size:19px;font-weight:800;text-align:center;outline:none;-moz-appearance:textfield}
+.set input::placeholder{color:#4f5966;font-weight:600;font-size:15px}
+.set input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(198,255,61,.15)}
+.chk{width:56px;height:50px;border-radius:12px;border:2px solid #36404c;background:transparent;font-size:24px;font-weight:900;color:transparent;transition:.15s}
+.chk.on{background:var(--ok);border-color:var(--ok);color:#06210f}
+.chk:active{transform:scale(.93)}
+.set .drop-row{grid-column:2/4;display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative}
+.set .drop-lbl{grid-column:1;font-size:12px;font-weight:800;color:#ff5dc8;align-self:center}
+.prev{grid-column:1/-1;justify-self:start;background:none;border:0;padding:2px 2px 0;font-size:13px;color:var(--mut);text-align:left;min-height:28px}
+.prev b{color:#c9d1db}
+.prev u{color:var(--acc);text-decoration:none;font-weight:700;margin-left:4px}
+
+.rest-btn{margin-top:12px;width:100%;min-height:56px;border-radius:14px;border:2px solid var(--acc);background:rgba(198,255,61,.07);color:var(--acc);font-weight:900;font-size:17px;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px}
+.rest-btn:active{transform:scale(.98);background:rgba(198,255,61,.16)}
+
+/* Warm-up */
+.warm{border-color:rgba(255,122,47,.35);background:linear-gradient(180deg,rgba(255,122,47,.07),transparent 60%),var(--card)}
+.warm h3{margin:4px 0 6px;font-size:19px;font-weight:800}
+.wg-list{display:grid;gap:8px;margin-top:12px}
+.wg{display:flex;gap:12px;align-items:center;text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:52px;font-size:15px}
+.wg i{width:26px;height:26px;border-radius:8px;border:2px solid #36404c;flex:none;display:grid;place-items:center;font-style:normal;font-weight:900;color:transparent;font-size:15px}
+.wg.on{border-color:rgba(61,220,132,.38);background:rgba(61,220,132,.07)}
+.wg.on i{background:var(--ok);border-color:var(--ok);color:#06210f}
+.wg.on span{color:var(--mut);text-decoration:line-through}
+.sub{margin:14px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--acc2);font-weight:800}
+
+footer.foot{color:var(--mut);font-size:12.5px;text-align:center;padding:10px 0 20px}
+
+/* Timer */
+.timer{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,19,24,.97);border-top:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:0 0 var(--safe-b);box-shadow:0 -10px 30px rgba(0,0,0,.45);animation:up .25s ease}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.t-prog{height:5px;background:#202730}
+.t-prog i{display:block;height:100%;background:var(--acc);width:100%;transition:width .25s linear}
+.t-row{max-width:980px;margin:0 auto;padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.t-info{min-width:0;display:grid}
+.t-info span{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-info strong{font-size:44px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.t-btns{display:flex;gap:6px;flex:none}
+.t-btns button{min-width:50px;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--card2);font-weight:900;font-size:16px}
+.t-btns button.stop{color:var(--bad)}
+.timer.warn .t-info strong{color:var(--acc2)}
+.timer.warn .t-prog i{background:var(--acc2)}
+.timer.done{background:var(--acc);border-color:var(--acc)}
+.timer.done .t-info span,.timer.done .t-info strong{color:#0b0d10}
+.timer.done .t-btns button{background:rgba(0,0,0,.15);border-color:rgba(0,0,0,.2);color:#0b0d10}
+.timer.done{animation:pulse 1s ease-in-out 4}
+@keyframes pulse{50%{filter:brightness(1.25)}}
+.timer.paused .t-info strong{opacity:.5}
+
+/* Toast & modal */
+.toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-120%);background:#232b34;border:1px solid var(--line);color:var(--txt);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:80;transition:transform .25s;max-width:calc(100% - 32px);text-align:center}
+.toast.show{transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90;display:grid;place-items:center;padding:16px}
+.modal-box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;max-width:420px;width:100%}
+.modal-box h3{margin:0 0 8px;font-size:20px}
+.modal-box p{margin:0 0 16px;color:#cfd6df;font-size:15px}
+.modal-box .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-box .btn{min-height:52px;font-size:16px}
+
+@media (max-width:420px){
+  .brand h1{font-size:17px}
+  .top .btn.danger{padding:0 10px;font-size:13px}
+  .sets-h,.set{grid-template-columns:54px 1fr 1fr 52px;gap:6px}
+  .chk{width:52px}
+  .t-info strong{font-size:38px}
+  .t-btns button{min-width:44px;height:48px;font-size:15px}
+  .tab span{font-size:11.5px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script id="lottie-js" src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" async></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></svg></div>
+      <div><h1>Програма тренувань</h1><p id="weekInfo">—</p></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn icon-btn" id="settingsBtn" aria-label="Налаштування" aria-expanded="false">⚙︎</button>
+      <button class="btn danger" id="resetBtn">Скинути тиждень</button>
+    </div>
+  </header>
+  <div class="banner install" id="installHint" hidden>
+    <span>Щоб відкривати як застосунок: натисни <b>Поділитися</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1"/></svg> → <b>На початковий екран</b>.</span>
+    <button class="btn" id="installClose" aria-label="Закрити підказку">✕</button>
+  </div>
+  <section class="settings" id="settings" hidden>
+    <label class="switch"><span>Запускати таймер, коли відмічаю підхід</span><input type="checkbox" id="optAuto"></label>
+    <label class="switch"><span>Звуковий сигнал</span><input type="checkbox" id="optSound"></label>
+    <label class="switch"><span>Вібрація (Android)</span><input type="checkbox" id="optVib"></label>
+    <div class="row2">
+      <button class="btn" id="testBeep">🔊 Перевірити сигнал</button>
+      <button class="btn" id="exportBtn">⬆︎ Зберегти копію даних</button>
+      <button class="btn" id="importBtn">⬇︎ Відновити з копії</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <p class="hint">Дані зберігаються на цьому пристрої. Застосунок на головному екрані iPhone має окреме сховище від Safari — щоб перенести ваги, збережи копію в одному місці й віднови в іншому. Звук працює, коли застосунок відкритий на екрані й вимкнено беззвучний режим.</p>
+  </section>
+</div>
+<div class="tabs-bar"><div class="wrap"><nav class="tabs" id="tabs" role="tablist"></nav></div></div>
+<main class="wrap" id="main"></main>
+
+<div class="timer" id="timer" hidden>
+  <div class="t-prog"><i id="tProg"></i></div>
+  <div class="t-row">
+    <div class="t-info"><span id="tLabel">Відпочинок</span><strong id="tTime">0:00</strong></div>
+    <div class="t-btns">
+      <button data-t="-15" aria-label="Мінус 15 секунд">−15</button>
+      <button data-t="+15" aria-label="Плюс 15 секунд">+15</button>
+      <button data-t="pause" id="tPause" aria-label="Пауза">❚❚</button>
+      <button data-t="stop" class="stop" aria-label="Зупинити">✕</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal" id="modal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Скинути тиждень?</h3>
+    <p id="modalText"></p>
+    <div class="row"><button class="btn" id="modalCancel">Скасувати</button><button class="btn acc" id="modalOk">Так, скинути</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============ ПРОГРАМА ============ */
+const sets = (n, reps, extra = {}) => Array.from({length: n}, () => ({reps, ...extra}));
+
+const DAYS = [
+{
+  id: 'd1', name: 'День 1', title: 'Груди + трицепс',
+  warm: {
+    id: 'wu-d1', rest: 60,
+    general: ['5 хв легкого кардіо (доріжка або велотренажер)', 'Обертання плечима, розведення рук з резинкою — 2×15', 'Віджимання від підлоги — 1×10, спокійно'],
+    target: 'Жим штанги лежачи',
+    sets: [{reps: '12', tag: '40–50%', tagc: 'wu'}, {reps: '5–6', tag: '60–70%', tagc: 'wu'}]
+  },
+  ex: [
+    {id: 'bench', name: 'Жим штанги лежачи',
+      sets: [...sets(2, '6', {tag: 'важкий'}), ...sets(3, '8–12')], scheme: '2×6 важкі + 3×8–12', rest: 150, restLabel: '2–3 хв',
+      note: 'Перші 2 підходи — важкі по 6 повторень (бажано зі страхувальником), далі 3 робочі по 8–12.',
+      tips: ['Лопатки зведені й опущені, легкий прогин у попереку, сідниці на лаві.', 'Хват трохи ширший за плечі, зап’ястки рівно над ліктями.', 'Опускай гриф на низ грудей за 2–3 с, лікті під ~45–70° до корпусу.', 'Ноги впираються в підлогу; тисни вгору й трохи назад до плечей.'],
+      errs: ['Відрив таза від лави', 'Лікті розведені під 90° — перевантаження плечей', 'Відбив штанги від грудей']},
+    {id: 'inclDb', name: 'Жим гантелей на похилій лаві',
+      sets: sets(4, '8–12'), scheme: '4 × 8–12', rest: 120, restLabel: '2 хв',
+      tips: ['Кут лави 30–45°, лопатки зведені, груди «вперед».', 'Опускай гантелі до рівня верху грудей, лікті трохи нижче плечей.', 'Тисни вгору по дузі, зводячи гантелі над грудьми без стуку.', 'Контрольований негатив 2–3 с.'],
+      errs: ['Занадто крутий кут — працюють плечі замість грудей', 'Неповна амплітуда', 'Плечі піднімаються до вух']},
+    {id: 'smithIncl', name: 'Жим у Сміті на похилій',
+      sets: sets(3, '10–12'), scheme: '3 × 10–12', rest: 105, restLabel: '1,5–2 хв',
+      tips: ['Постав лаву так, щоб гриф опускався на верх грудей, під ключиці.', 'Хват трохи ширший за плечі, лопатки зведені.', 'Опускай повільно до легкого торкання грудей.', 'Тисни без повного «замка» в ліктях — тримай напругу в грудях.'],
+      errs: ['Лава не на місці — гриф іде на шию або живіт', 'Відбив від грудей', 'Відрив таза від лави']},
+    {id: 'flyes', name: 'Розведення гантелей лежачи',
+      sets: [...sets(2, '12–15'), {reps: '12–15', tag: 'дропсет', tagc: 'drop', drop: true}], scheme: '3 × 12–15, останній — дропсет', rest: 90, restLabel: '1,5 хв',
+      note: 'Дропсет: дійди до відмови → одразу візьми гантелі на 20–30% легші → знову до відмови. Друга вага — у полі «дроп».',
+      tips: ['Лікті трохи зігнуті й фіксовані впродовж усього руху.', 'Опускай гантелі в сторони до розтягнення грудей (приблизно на рівень корпусу).', 'Зводь руки по дузі, ніби обіймаєш велике дерево.', 'Вгорі не стукай гантелями — зупинись трохи раніше.'],
+      errs: ['Згинання-розгинання ліктів — вправа перетворюється на жим', 'Надто глибоке опускання — ризик для плечей', 'Занадто важкі гантелі']},
+    {id: 'dips', name: 'Віджимання на брусах',
+      sets: sets(3, '8–12'), scheme: '3 × 8–12', rest: 90, restLabel: '1,5 хв', wl: '+кг',
+      note: 'Поле «+кг» — додаткова вага на поясі (0 = власна вага).',
+      tips: ['Нахил корпусу вперед — більше грудей; вертикально — більше трицепса.', 'Опускайся до ~90° у ліктях, плечі тримай подалі від вух.', 'Лікті йдуть назад, а не в сторони.', 'Коли 12 повторень даються легко — додай вагу.'],
+      errs: ['Занадто глибоке опускання з болем у плечах', 'Розгойдування й ривки ногами', 'Плечі підтягуються до вух']},
+    {id: 'french', name: 'Французький жим',
+      sets: sets(3, '10–12'), scheme: '3 × 10–12', rest: 90, restLabel: '1,5 хв',
+      tips: ['Лежачи, плечі вертикально або трохи нахилені до голови.', 'Згинай руки лише в ліктях, опускаючи гриф до лоба / за голову.', 'Лікті дивляться вперед і не розходяться в сторони.', 'EZ-гриф менше навантажує зап’ястки.'],
+      errs: ['Рух у плечах — лікті «гуляють»', 'Лікті розходяться в сторони', 'Швидкий неконтрольований негатив']}
+  ]
+},
+{
+  id: 'd2', name: 'День 2', title: 'Спина + біцепс',
+  warm: {
+    id: 'wu-d2', rest: 60,
+    general: ['5 хв гребного тренажера або легкого кардіо', 'Вис на турніку 2×20–30 с + 10 лопаткових підтягувань', 'Обертання плечима, нахили корпусу'],
+    target: 'Тяга верхнього блоку / тяга штанги',
+    sets: [{reps: '15', tag: 'легко', tagc: 'wu'}, {reps: '8–10', tag: '~50%', tagc: 'wu'}]
+  },
+  ex: [
+    {id: 'pullup', name: 'Підтягування',
+      sets: sets(4, 'макс'), scheme: '4 × максимум', rest: 120, restLabel: '2 хв', wl: '+кг',
+      note: 'Повторення — максимум у кожному підході. Записуй кількість: щотижня намагайся додати хоча б 1. «+кг» — додаткова вага (0 = власна).',
+      tips: ['Хват трохи ширший за плечі; рух починай з опускання лопаток.', 'Тягни лікті вниз до боків, груди — до перекладини.', 'Підборіддя вище перекладини, вниз — до майже прямих рук під контролем.', 'Ноги разом, корпус стабільний.'],
+      errs: ['Розгойдування та ривки ногами', 'Неповна амплітуда («напівповторення»)', 'Тягнешся шиєю замість роботи спини']},
+    {id: 'bbRow', name: 'Тяга штанги в нахилі',
+      sets: sets(4, '8–12'), scheme: '4 × 8–12', rest: 120, restLabel: '2 хв',
+      tips: ['Нахил корпусу 30–45° до горизонталі, спина рівна, коліна злегка зігнуті.', 'Тягни гриф до низу живота, ведучи лікті назад уздовж тіла.', 'Вгорі зведи лопатки й затримайся на мить.', 'Опускай під контролем, не змінюючи нахилу.'],
+      errs: ['Круглий поперек', 'Розгинання корпусу на кожному повторі (читинг)', 'Тягнеш руками — працює біцепс, а не спина']},
+    {id: 'dbRow', name: 'Тяга гантелі однією рукою',
+      sets: sets(4, '12–15'), scheme: '4 × 12–15 (на кожну руку)', rest: 90, restLabel: '1,5 хв',
+      tips: ['Коліно й долоня на лаві, спина паралельна підлозі.', 'Тягни гантель до пояса по дузі, лікоть близько до корпусу.', 'Вгорі стисни широчайший, внизу дай лопатці розтягнутися.', 'Корпус не розвертається — працюють рука та спина.'],
+      errs: ['Скручування корпусу під час тяги', 'Тяга до грудей замість пояса', 'Ривки й розгойдування']},
+    {id: 'latPull', name: 'Тяга верхнього блоку',
+      sets: sets(3, '15'), scheme: '3 × 15', rest: 75, restLabel: '1–1,5 хв',
+      tips: ['Зафіксуй стегна під валиками, хват трохи ширший за плечі.', 'Невеликий нахил назад (10–20°), груди вперед.', 'Тягни гриф до верху грудей, лікті вниз і назад.', 'Повертай повільно, повністю розтягуючи спину.'],
+      errs: ['Тяга за голову', 'Сильне відхилення назад і розгойдування', 'Неповна амплітуда вгорі']},
+    {id: 'curl', name: 'Підйом штанги на біцепс',
+      sets: sets(5, '6'), scheme: '5 × 6', rest: 30, restLabel: '30 с',
+      note: 'Відпочинок лише 30 с — підбери вагу, з якою всі 5×6 виходять чисто.',
+      tips: ['Стій рівно, лікті притиснуті до корпусу.', 'Піднімай силою біцепса — лікті нерухомі.', 'Опускай повільно, 2–3 с, до майже прямих рук.', 'Хват на ширині плечей, зап’ястки рівні.'],
+      errs: ['Розгойдування корпусом', 'Лікті виїжджають вперед', 'Неповне опускання']}
+  ]
+},
+{
+  id: 'd3', name: 'День 3', title: 'Ноги + плечі',
+  note: 'Усі вправи на ноги — 3×6 з відпочинком 30 с. Вага робоча, але техніка — понад усе.',
+  warm: {
+    id: 'wu-d3', rest: 60,
+    general: ['5–7 хв велотренажера', 'Присідання з власною вагою ×15, випади ×10 на ногу', 'Махи ногами й обертання в кульшових суглобах'],
+    target: 'Присід у гаку',
+    sets: [{reps: '12', tag: '40–50%', tagc: 'wu'}, {reps: '6', tag: '60–70%', tagc: 'wu'}]
+  },
+  ex: [
+    {id: 'hack', name: 'Присід у гаку',
+      sets: sets(3, '6'), scheme: '3 × 6', rest: 30, restLabel: '30 с',
+      tips: ['Спина й таз щільно притиснуті до спинки.', 'Стопи на ширині плечей посередині платформи.', 'Опускайся до паралелі стегон з платформою або нижче; коліна — у напрямку носків.', 'Тисни всією стопою, не блокуй коліна вгорі.'],
+      errs: ['Відрив таза від спинки внизу', 'Коліна зводяться всередину', 'Відрив п’ят від платформи']},
+    {id: 'legPress', name: 'Жим ногами',
+      sets: sets(3, '6'), scheme: '3 × 6', rest: 30, restLabel: '30 с',
+      tips: ['Поперек і таз притиснуті до спинки весь час.', 'Стопи на ширині плечей, коліна в напрямку носків.', 'Опускай платформу до ~90° у колінах, без підкручування таза.', 'Не блокуй коліна у верхній точці.'],
+      errs: ['Таз відривається внизу — поперек округлюється', 'Розгинання в «замок» колін', 'Мала амплітуда з надмірною вагою']},
+    {id: 'legExt', name: 'Розгинання ніг',
+      sets: sets(3, '6'), scheme: '3 × 6', rest: 30, restLabel: '30 с',
+      tips: ['Вісь тренажера на рівні колінного суглоба, валик — над щиколоткою.', 'Розгинай до прямих ніг і на мить стисни квадрицепс.', 'Опускай повільно, не кидаючи вагу.', 'Тримайся за ручки, таз не відривається.'],
+      errs: ['Махові рухи та ривки', 'Відрив таза від сидіння', 'Неправильне налаштування валика / спинки']},
+    {id: 'rdl', name: 'Румунська тяга',
+      sets: sets(3, '6'), scheme: '3 × 6', rest: 30, restLabel: '30 с',
+      tips: ['Коліна злегка зігнуті, і цей кут майже не змінюється.', 'Відводь таз назад, гриф ковзає вздовж стегон.', 'Опускай до середини гомілки — до відчуття розтягнення задньої поверхні стегна.', 'Спина рівна; вгору — штовхаючи таз вперед.'],
+      errs: ['Округлення спини', 'Присідання замість нахилу', 'Гриф далеко від ніг']},
+    {id: 'legCurl', name: 'Згинання ніг',
+      sets: sets(3, '6'), scheme: '3 × 6', rest: 30, restLabel: '30 с',
+      tips: ['Валик над п’ятами, коліна трохи за краєм лави.', 'Згинай до максимуму, стискаючи задню поверхню стегна.', 'Таз притиснутий до лави.', 'Повільний негатив, 2–3 с.'],
+      errs: ['Таз піднімається з лави', 'Ривки та закидання ваги', 'Неповна амплітуда']},
+    {id: 'smithPress', name: 'Жим у Сміті сидячи',
+      sets: sets(4, '6–10'), scheme: '4 × 6–10', rest: 90, restLabel: '1,5 хв',
+      tips: ['Спинка майже вертикальна; лава так, щоб гриф ішов перед обличчям.', 'Опускай гриф до рівня підборіддя / верху грудей.', 'Тисни вгору без повного «замка» ліктів.', 'Прес напружений, поперек притиснутий до спинки.'],
+      errs: ['Сильний прогин у попереку', 'Неповна амплітуда', 'Лікті строго в сторони при дискомфорті в плечах']},
+    {id: 'lateral', name: 'Махи гантелями в сторони',
+      sets: sets(4, '12–15'), scheme: '4 × 12–15', rest: 60, restLabel: '1 хв',
+      tips: ['Лікті трохи зігнуті; піднімай руки до рівня плечей.', 'Веди рух ліктями — кисті не вище ліктів.', 'Плечі опущені, трапеції не включаються.', 'Опускай повільно, без кидання.'],
+      errs: ['Розгойдування корпусом', 'Підйом вище плечей «трапеціями»', 'Занадто важкі гантелі']},
+    {id: 'rearDelt', name: 'Махи в нахилі',
+      sets: sets(3, '15'), scheme: '3 × 15', rest: 60, restLabel: '1 хв',
+      tips: ['Нахил корпусу майже до паралелі з підлогою, спина рівна.', 'Розводь руки в сторони до лінії плечей, лікті трохи зігнуті.', 'Не зводь лопатки — має працювати задня дельта.', 'Легка вага, повільний темп.'],
+      errs: ['Ривки корпусом', 'Зведення лопаток замість роботи дельт', 'Корпус піднімається під час повтору']}
+  ]
+}];
+
+/* ============ АНІМАЦІЇ (Lottie) ============ */
+// Файли лежать у папці animations/ і називаються як вправа: «animations/Жим штанги лежачи.json».
+// Запасний варіант — за id вправи: «animations/bench.json».
+const ANIM_DIR = 'animations/';
+const players = new Map(); // figure → екземпляр lottie
+const lottieReady = new Promise(res => {
+  if (window.lottie) return res(true);
+  const s = document.getElementById('lottie-js');
+  s.addEventListener('load', () => res(true));
+  s.addEventListener('error', () => res(false));
+  setTimeout(() => res(!!window.lottie), 10000);
+});
+const DUMBBELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></svg>';
+async function fetchAnim(e) {
+  for (const name of [e.name, e.id]) {
+    const url = ANIM_DIR + encodeURIComponent(name) + '.json';
+    try {
+      const r = await fetch(url, {cache: 'no-cache'});
+      if (!r.ok) continue;
+      const data = await r.json();
+      // зовнішні зображення (якщо є) шукаємо поруч із json
+      (data.assets || []).forEach(a => { if (a.p && !a.e && !/^data:/.test(a.p)) a.u = ANIM_DIR + (a.u || ''); });
+      return data;
+    } catch (err) { /* файла немає або не JSON — пробуємо далі */ }
+  }
+  return null;
+}
+function figEmpty(fig, title, hint) {
+  fig.classList.remove('loading'); fig.classList.add('empty');
+  fig.querySelector('.lt-box').innerHTML = `<div class="lt-empty">${DUMBBELL}<b>${title}</b>${hint ? `<small>${esc(hint)}</small>` : ''}</div>`;
+}
+async function mountAnim(fig) {
+  const e = EX[fig.dataset.exId];
+  const [ok, data] = await Promise.all([lottieReady, fetchAnim(e)]);
+  if (!fig.isConnected) return;
+  if (!data) return figEmpty(fig, 'Анімацію ще не додано', location.protocol === 'file:'
+    ? 'Відкрийте сторінку через вебсервер, щоб підвантажити файли з папки animations'
+    : `Очікуваний файл: animations/${e.name}.json`);
+  if (!ok || !window.lottie) return figEmpty(fig, 'Не вдалося завантажити програвач анімацій', 'Перевірте інтернет — lottie-web підвантажується з CDN');
+  const box = fig.querySelector('.lt-box');
+  if (data.w && data.h) box.style.setProperty('--ar', `${data.w} / ${data.h}`);
+  try {
+    const anim = lottie.loadAnimation({container: box, renderer: 'svg', loop: true, autoplay: false, animationData: data,
+      rendererSettings: {preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true}});
+    players.set(fig, anim);
+  } catch (err) {
+    box.innerHTML = '';
+    return figEmpty(fig, 'Файл анімації пошкоджений', `animations/${e.name}.json`);
+  }
+  fig.classList.remove('loading');
+  fig.querySelector('.lt-btn').hidden = false;
+  syncPlay(fig);
+}
+// грає, якщо видно на екрані й користувач не поставив на паузу
+function syncPlay(fig) {
+  const a = players.get(fig);
+  if (!a) return;
+  const userPaused = fig.classList.contains('user-paused');
+  !userPaused && fig.dataset.visible !== '0' ? a.play() : a.pause();
+  const b = fig.querySelector('.lt-btn');
+  b.textContent = userPaused ? '▶' : '❚❚';
+  b.setAttribute('aria-label', userPaused ? 'Старт анімації' : 'Пауза анімації');
+  b.setAttribute('aria-pressed', String(userPaused));
+}
+
+/* ============ СТАН / localStorage ============ */
+const KEY = 'gymProgram.v1';
+const DEF = () => ({cur: {}, prev: {}, prevDate: {}, dayLast: {}, tab: 0, weekStart: Date.now(), set: {auto: false, sound: true, vib: true}});
+let S;
+try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem(KEY) || '{}')); S.set = Object.assign(DEF().set, S.set); }
+catch (e) { S = DEF(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+const EX = {}; const EX_DAY = {};
+DAYS.forEach(d => {
+  EX[d.warm.id] = {id: d.warm.id, name: 'Розминка', rest: d.warm.rest, sets: d.warm.sets}; EX_DAY[d.warm.id] = d.id;
+  d.ex.forEach(e => { EX[e.id] = e; EX_DAY[e.id] = d.id; });
+});
+const k = (ex, i) => ex + ':' + i;
+const cur = (ex, i) => S.cur[k(ex, i)] || {};
+function setField(ex, i, f, v) {
+  const o = S.cur[k(ex, i)] = Object.assign({}, S.cur[k(ex, i)]);
+  o[f] = v;
+  S.dayLast[EX_DAY[ex]] = Date.now();
+  save();
+}
+
+/* ============ УТИЛІТИ ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const fmt = sec => { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
+const dstr = ts => new Date(ts).toLocaleDateString('uk-UA', {day: '2-digit', month: '2-digit'});
+const daysAgo = ts => Math.floor((Date.now() - ts) / 864e5);
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+function ask(text, title = 'Скинути тиждень?', ok = 'Так, скинути') {
+  return new Promise(res => {
+    $('#modalTitle').textContent = title; $('#modalOk').textContent = ok;
+    $('#modalText').textContent = text; $('#modal').hidden = false; $('#modalOk').focus();
+    const done = v => { $('#modal').hidden = true; res(v); };
+    $('#modalOk').onclick = () => done(true); $('#modalCancel').onclick = () => done(false);
+  });
+}
+
+/* ============ РЕНДЕР ============ */
+function setHTML(exId, i, set, wl) {
+  const c = cur(exId, i), p = S.prev[k(exId, i)];
+  const pTxt = p && (p.w || p.r) ? `${p.w ? esc(p.w) + ' кг' : '—'}${p.r ? ' × ' + esc(p.r) : ''}${p.w2 ? ' · дроп ' + esc(p.w2) + (p.r2 ? '×' + esc(p.r2) : '') : ''}` : '';
+  return `<div class="set${c.d ? ' done' : ''}" data-ex="${exId}" data-i="${i}">
+    <div class="n"><b>${i + 1}</b><small>${esc(set.reps)} повт</small>${set.tag ? `<i class="tag ${set.tagc || ''}">${set.tag}</i>` : ''}</div>
+    <input data-f="w" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="${p && p.w ? esc(p.w) : (wl === '+кг' ? '+кг' : 'кг')}" value="${esc(c.w)}" aria-label="Вага, підхід ${i + 1}">
+    <input data-f="r" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="${esc(set.reps)}" value="${esc(c.r)}" aria-label="Повторення, підхід ${i + 1}">
+    <button class="chk${c.d ? ' on' : ''}" aria-pressed="${!!c.d}" aria-label="Підхід ${i + 1} виконано">✓</button>
+    ${set.drop ? `<span class="drop-lbl">↘ дроп</span><div class="drop-row"><input data-f="w2" type="text" inputmode="decimal" autocomplete="off" placeholder="${p && p.w2 ? esc(p.w2) : 'кг'}" value="${esc(c.w2)}" aria-label="Вага дропу"><input data-f="r2" type="text" inputmode="numeric" autocomplete="off" placeholder="повт" value="${esc(c.r2)}" aria-label="Повторення дропу"></div>` : ''}
+    ${pTxt ? `<button class="prev" data-fill>↺ минулого разу: <b>${pTxt}</b><u>підставити</u></button>` : ''}
+  </div>`;
+}
+function warmHTML(d) {
+  const w = d.warm;
+  return `<section class="card warm" data-ex="${w.id}">
+    <div class="ex-t"><div class="chips"><span class="chip warm">Розминка</span><span class="chip">8–10 хв</span></div><h3>Розминка перед важкими підходами</h3></div>
+    <div class="wg-list">${w.general.map((g, j) => { const on = cur(w.id, 'g' + j).d; return `<button class="wg${on ? ' on' : ''}" data-wg="${w.id}" data-j="${j}" aria-pressed="${!!on}"><i>✓</i><span>${g}</span></button>`; }).join('')}</div>
+    <p class="sub">Легкі підходи: ${w.target}</p>
+    <div class="sets"><div class="sets-h"><span>Підхід</span><span>Вага, кг</span><span>Повт.</span><span>✓</span></div>${w.sets.map((s, i) => setHTML(w.id, i, s)).join('')}</div>
+    <button class="rest-btn" data-rest="${w.rest}" data-label="Розминка"><span>⏱</span> Відпочинок · ${fmt(w.rest)}</button>
+  </section>`;
+}
+function exHTML(e, n, wide) {
+  const pd = S.prevDate[e.id];
+  return `<article class="card ex" id="ex-${e.id}" data-ex="${e.id}">
+    <header class="ex-h"><div class="ex-num">${n}</div>
+      <div class="ex-t"><h3>${e.name}</h3><div class="chips"><span class="chip">${e.sets.length} підх.</span><span class="chip">${e.scheme}</span><span class="chip rest">⏱ ${e.restLabel}</span></div></div>
+      <div class="ex-ok" aria-hidden="true">✓</div></header>
+    ${pd ? `<p class="prev-date">Минулого разу: ${dstr(pd)}</p>` : ''}
+    <div class="ex-body">
+      <figure class="fig-wrap loading" data-fig data-ex-id="${e.id}"><div class="lt-box" role="img" aria-label="Анімація техніки: ${esc(e.name)}"></div><button class="lt-btn" type="button" aria-label="Пауза анімації" hidden>❚❚</button></figure>
+      <details class="tech"${wide ? ' open' : ''}><summary>Техніка та помилки</summary><div class="tech-in">
+        <h4 class="good">Техніка</h4><ul class="good">${e.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+        <h4 class="bad">Типові помилки</h4><ul class="bad">${e.errs.map(t => `<li>${t}</li>`).join('')}</ul>
+      </div></details>
+    </div>
+    ${e.note ? `<p class="ex-note">${e.note}</p>` : ''}
+    <div class="sets"><div class="sets-h"><span>Підхід</span><span>${e.wl === '+кг' ? '+Вага, кг' : 'Вага, кг'}</span><span>Повт.</span><span>✓</span></div>${e.sets.map((s, i) => setHTML(e.id, i, s, e.wl)).join('')}</div>
+    <button class="rest-btn" data-rest="${e.rest}" data-label="${esc(e.name)}"><span>⏱</span> Відпочинок · ${fmt(e.rest)}</button>
+  </article>`;
+}
+function render() {
+  players.forEach(a => a.destroy()); players.clear();
+  const wide = window.innerWidth >= 760;
+  $('#tabs').innerHTML = DAYS.map((d, i) => `<button class="tab" role="tab" data-tab="${i}" aria-selected="false"><b>${d.name}</b><span>${d.title}</span><em id="tp-${d.id}"></em></button>`).join('');
+  $('#main').innerHTML = DAYS.map((d, i) => {
+    const total = d.ex.reduce((a, e) => a + e.sets.length, 0);
+    return `<section class="day" id="day-${i}" data-day="${d.id}" hidden>
+      <div class="day-h"><h2>${d.name}: ${d.title}</h2><p>${d.ex.length} вправ · ${total} робочих підходів</p><div class="pbar"><i id="pb-${d.id}"></i></div></div>
+      <div class="banner" id="stale-${d.id}" hidden><span></span><button class="btn acc" data-reset>Скинути тиждень</button></div>
+      ${d.note ? `<div class="day-note">${d.note}</div>` : ''}
+      ${warmHTML(d)}
+      ${d.ex.map((e, j) => exHTML(e, j + 1, wide)).join('')}
+    </section>`;
+  }).join('') + '<footer class="foot">Дані зберігаються локально в цьому браузері · «Скинути тиждень» переносить ваги в «минулого разу».</footer>';
+  observeFigs();
+  setTab(S.tab || 0, false);
+  refresh();
+}
+function setTab(i, scroll = true) {
+  S.tab = i; save();
+  $$('.tab').forEach(t => t.setAttribute('aria-selected', String(+t.dataset.tab === i)));
+  $$('.day').forEach((d, j) => d.hidden = j !== i);
+  buildFigs(i);
+  if (scroll) window.scrollTo({top: 0});
+}
+function refresh() {
+  let allDone = 0, allTot = 0;
+  DAYS.forEach(d => {
+    let done = 0, tot = 0;
+    d.ex.forEach(e => {
+      let ed = 0;
+      e.sets.forEach((_, i) => { if (cur(e.id, i).d) ed++; });
+      done += ed; tot += e.sets.length;
+      const card = $('#ex-' + e.id); if (card) card.classList.toggle('complete', ed === e.sets.length);
+    });
+    allDone += done; allTot += tot;
+    $('#tp-' + d.id).textContent = `${done}/${tot}`;
+    $('#pb-' + d.id).style.width = (tot ? done / tot * 100 : 0) + '%';
+    const warmCard = $(`.warm[data-ex="${d.warm.id}"]`);
+    if (warmCard) warmCard.classList.toggle('complete', d.warm.sets.every((_, i) => cur(d.warm.id, i).d));
+    // підказка: відмітки цього дня старші за 4 дні
+    const b = $('#stale-' + d.id), last = S.dayLast[d.id];
+    const stale = last && daysAgo(last) >= 4 && done > 0;
+    b.hidden = !stale;
+    if (stale) b.querySelector('span').textContent = `Відмітки цього дня з ${dstr(last)} (${daysAgo(last)} дн. тому). Почати новий тиждень?`;
+  });
+  $('#weekInfo').textContent = `Тиждень з ${dstr(S.weekStart)} · виконано ${allDone}/${allTot} підходів`;
+}
+
+/* ============ ВЗАЄМОДІЯ ============ */
+const main = $('#main');
+main.addEventListener('input', e => {
+  const inp = e.target, row = inp.closest('.set');
+  if (!row || !inp.dataset.f) return;
+  setField(row.dataset.ex, +row.dataset.i, inp.dataset.f, inp.value.trim());
+});
+main.addEventListener('click', e => {
+  const t = e.target;
+  const chk = t.closest('.chk');
+  if (chk) {
+    ensureAudio();
+    const row = chk.closest('.set'), ex = row.dataset.ex, i = +row.dataset.i;
+    const on = !cur(ex, i).d;
+    setField(ex, i, 'd', on);
+    chk.classList.toggle('on', on); chk.setAttribute('aria-pressed', String(on));
+    row.classList.toggle('done', on);
+    refresh();
+    if (on && S.set.auto) startTimer(EX[ex].rest, EX[ex].name + ` · підхід ${i + 1}`);
+    return;
+  }
+  const fill = t.closest('[data-fill]');
+  if (fill) {
+    const row = fill.closest('.set'), p = S.prev[k(row.dataset.ex, +row.dataset.i)] || {};
+    ['w', 'w2'].forEach(f => { const inp = row.querySelector(`[data-f="${f}"]`); if (inp && p[f]) { inp.value = p[f]; setField(row.dataset.ex, +row.dataset.i, f, p[f]); } });
+    toast('Вагу підставлено');
+    return;
+  }
+  const wg = t.closest('.wg');
+  if (wg) {
+    const on = !cur(wg.dataset.wg, 'g' + wg.dataset.j).d;
+    setField(wg.dataset.wg, 'g' + wg.dataset.j, 'd', on);
+    wg.classList.toggle('on', on); wg.setAttribute('aria-pressed', String(on));
+    return;
+  }
+  const rb = t.closest('.rest-btn');
+  if (rb) { ensureAudio(); startTimer(+rb.dataset.rest, rb.dataset.label); return; }
+  if (t.closest('[data-reset]')) { resetWeek(); return; }
+  const lb = t.closest('.lt-btn');
+  if (lb) { const fig = lb.closest('[data-fig]'); fig.classList.toggle('user-paused'); syncPlay(fig); }
+});
+main.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('.set input')) {
+    const all = $$('.day:not([hidden]) .set input'); const j = all.indexOf(e.target);
+    if (all[j + 1]) all[j + 1].focus(); else e.target.blur();
+  }
+});
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) setTab(+b.dataset.tab); });
+$('#resetBtn').addEventListener('click', resetWeek);
+$('#settingsBtn').addEventListener('click', () => {
+  const p = $('#settings'); p.hidden = !p.hidden; $('#settingsBtn').setAttribute('aria-expanded', String(!p.hidden));
+});
+[['optAuto', 'auto'], ['optSound', 'sound'], ['optVib', 'vib']].forEach(([id, key]) => {
+  const el = $('#' + id); el.checked = !!S.set[key];
+  el.addEventListener('change', () => { S.set[key] = el.checked; save(); });
+});
+$('#testBeep').addEventListener('click', () => { ensureAudio(); alarm(); });
+
+async function resetWeek() {
+  const ok = await ask('Поточні ваги й повторення буде збережено як «минулого разу», а всі відмітки й поля — очищено.');
+  if (!ok) return;
+  const now = Date.now();
+  for (const key in S.cur) {
+    const [ex, i] = key.split(':'), v = S.cur[key];
+    if (String(i).startsWith('g')) continue;
+    if (v.w || v.r || v.w2 || v.r2) {
+      S.prev[key] = {w: v.w || '', r: v.r || '', w2: v.w2 || '', r2: v.r2 || ''};
+      S.prevDate[ex] = S.dayLast[EX_DAY[ex]] || now;
+    }
+  }
+  S.cur = {}; S.dayLast = {}; S.weekStart = now;
+  save(); render(); toast('Новий тиждень! Минулі ваги — поруч із полями.');
+}
+
+/* Пауза анімацій поза екраном (економія батареї) */
+let io;
+function observeFigs() {
+  if (io) io.disconnect();
+  if (!('IntersectionObserver' in window)) return;
+  io = new IntersectionObserver(es => es.forEach(en => {
+    en.target.dataset.visible = en.isIntersecting ? '1' : '0';
+    syncPlay(en.target);
+  }), {rootMargin: '100px'});
+}
+/* Анімації дня завантажуються, коли день уперше відкрито */
+function buildFigs(i) {
+  $$(`#day-${i} [data-fig]:not([data-mounted])`).forEach(f => {
+    f.dataset.mounted = '1';
+    if (io) io.observe(f);
+    mountAnim(f);
+  });
+}
+
+/* ============ ЗВУК ============ */
+let AC = null;
+function ensureAudio() {
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+  } catch (e) {}
+}
+function beep(freq = 880, dur = .16, when = 0, vol = .4) {
+  if (!S.set.sound || !AC) return;
+  const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
+  o.type = 'square'; o.frequency.value = freq;
+  g.gain.setValueAtTime(.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + .01);
+  g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t + dur + .03);
+}
+function alarm() {
+  [0, .22, .44].forEach(w => beep(880, .15, w));
+  beep(1320, .55, .75, .45);
+  if (S.set.vib && navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 500]);
+}
+
+/* ============ ТАЙМЕР ============ */
+const T = {end: 0, total: 0, label: '', left: 0, paused: false, iv: null, ticks: {}, hideT: null};
+const tEl = $('#timer');
+let wl = null;
+async function wake(on) {
+  try {
+    if (on && 'wakeLock' in navigator && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null); }
+    else if (!on && wl) { await wl.release(); wl = null; }
+  } catch (e) {}
+}
+function startTimer(sec, label) {
+  clearInterval(T.iv); clearTimeout(T.hideT);
+  Object.assign(T, {total: sec, label, end: Date.now() + sec * 1000, paused: false, ticks: {}, left: sec});
+  $('#tLabel').textContent = 'Відпочинок · ' + label;
+  tEl.className = 'timer'; tEl.hidden = false;
+  $('#tPause').textContent = '❚❚';
+  tick(); T.iv = setInterval(tick, 200);
+  wake(true);
+}
+function remaining() { return T.paused ? T.left : Math.max(0, (T.end - Date.now()) / 1000); }
+function tick() {
+  const left = remaining(), s = Math.ceil(left);
+  $('#tTime').textContent = fmt(left);
+  $('#tProg').style.width = (T.total ? Math.min(100, left / T.total * 100) : 0) + '%';
+  tEl.classList.toggle('warn', s <= 10 && s > 0);
+  document.title = `⏱ ${fmt(left)} · Тренування`;
+  if (!T.paused && s <= 3 && s > 0 && !T.ticks[s]) { T.ticks[s] = 1; beep(660, .07); }
+  if (!T.paused && left <= 0) finish();
+}
+function finish() {
+  clearInterval(T.iv); T.iv = null;
+  tEl.className = 'timer done';
+  $('#tTime').textContent = 'Час!';
+  $('#tLabel').textContent = 'Наступний підхід 💪';
+  $('#tPause').textContent = '↻';
+  document.title = 'Програма тренувань';
+  alarm(); wake(false);
+  T.hideT = setTimeout(stopTimer, 12000);
+}
+function stopTimer() {
+  clearInterval(T.iv); clearTimeout(T.hideT); T.iv = null;
+  tEl.hidden = true; document.title = 'Програма тренувань'; wake(false);
+}
+tEl.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  ensureAudio();
+  const a = b.dataset.t;
+  if (a === 'stop') return stopTimer();
+  if (tEl.classList.contains('done')) {
+    if (a === 'pause') startTimer(T.total, T.label);
+    else if (a === '+15') startTimer(15, '+15 с');
+    return;
+  }
+  if (a === 'pause') {
+    if (T.paused) { T.end = Date.now() + T.left * 1000; T.paused = false; b.textContent = '❚❚'; }
+    else { T.left = remaining(); T.paused = true; b.textContent = '▶'; }
+    tEl.classList.toggle('paused', T.paused); tick(); return;
+  }
+  const d = a === '+15' ? 15 : -15;
+  if (T.paused) T.left = Math.max(0, T.left + d); else T.end += d * 1000;
+  if (d > 0) T.total = Math.max(T.total, remaining());
+  if (remaining() > 3) T.ticks = {};
+  tick();
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && T.iv) { wake(true); tick(); } });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) $('#modalCancel').click(); });
+
+/* ============ ЗАСТОСУНОК НА ГОЛОВНОМУ ЕКРАНІ (PWA) ============ */
+const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController) toast('Застосунок оновлено — нова версія з’явиться після перезапуску');
+  });
+}
+// просимо браузер не очищати дані застосунку
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+// підказка «На початковий екран» — лише в Safari на iPhone/iPad, поки застосунок не встановлено
+const IHK = 'gymProgram.installHint';
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+try { if (isIOS && !standalone && !localStorage.getItem(IHK)) $('#installHint').hidden = false; } catch (e) {}
+$('#installClose').addEventListener('click', () => { $('#installHint').hidden = true; try { localStorage.setItem(IHK, '1'); } catch (e) {} });
+
+// резервна копія даних
+$('#exportBtn').addEventListener('click', async () => {
+  const name = `trenuvannya-${new Date().toISOString().slice(0, 10)}.json`;
+  const file = new File([JSON.stringify(S, null, 2)], name, {type: 'application/json'});
+  try {
+    if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], title: 'Копія тренувань'}); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+});
+$('#importBtn').addEventListener('click', () => $('#importFile').click());
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  let data;
+  try { data = JSON.parse(await f.text()); } catch (err) { data = null; }
+  if (!data || typeof data.cur !== 'object' || typeof data.prev !== 'object') { toast('Це не файл копії тренувань'); return; }
+  const ok = await ask('Поточні дані на цьому пристрої буде замінено даними з файлу.', 'Відновити з копії?', 'Так, відновити');
+  if (!ok) return;
+  S = Object.assign(DEF(), data); S.set = Object.assign(DEF().set, data.set);
+  save(); render();
+  ['optAuto', 'optSound', 'optVib'].forEach((id, i) => $('#' + id).checked = !!S.set[['auto', 'sound', 'vib'][i]]);
+  toast('Дані відновлено');
+});
+
+render();
+})();
+</script>
+</body>
+</html>
