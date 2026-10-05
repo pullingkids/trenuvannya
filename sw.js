@@ -1,6 +1,6 @@
 /* Service worker: застосунок працює без інтернету після першого відкриття.
    Після зміни файлів застосунку збільшуй VERSION, щоб телефон підтягнув нову версію. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = 'shell-' + VERSION;
 const RUNTIME = 'runtime-v1';
 const LOTTIE = 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js';

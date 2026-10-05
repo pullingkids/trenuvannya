@@ -162,6 +162,7 @@ button,input,label{touch-action:manipulation}
 .sub{margin:14px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--acc2);font-weight:800}
 
 footer.foot{color:var(--mut);font-size:12.5px;text-align:center;padding:10px 0 20px}
+footer.foot a{color:var(--acc)}
 
 /* Timer */
 .timer{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(15,19,24,.97);border-top:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:0 0 var(--safe-b);box-shadow:0 -10px 30px rgba(0,0,0,.45);animation:up .25s ease}
@@ -544,7 +545,7 @@ function render() {
       ${warmHTML(d)}
       ${d.ex.map((e, j) => exHTML(e, j + 1, wide)).join('')}
     </section>`;
-  }).join('') + '<footer class="foot">Дані зберігаються локально в цьому браузері · «Скинути тиждень» переносить ваги в «минулого разу».</footer>';
+  }).join('') + '<footer class="foot">Дані зберігаються локально в цьому браузері · «Скинути тиждень» переносить ваги в «минулого разу».<br>Ілюстрації вправ: <a href="https://repdb.co" target="_blank" rel="noopener">Exercise data by RepDB (repdb.co)</a></footer>';
   observeFigs();
   setTab(S.tab || 0, false);
   refresh();
